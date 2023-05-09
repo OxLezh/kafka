@@ -35,13 +35,15 @@ public class PurchaseQuantityAlertTrasformer implements Processor<String, Generi
         long timestamp = record.timestamp();
         // округляем наш таймстемп вниз до ближайшей минуты - получаем начало окна
         long nearestMinutesTs = timestamp - timestamp % 60_000;
-        String productId = record.value().get("productid").toString();
-        Long quantity = (Long) record.value().get("quantity");
+        String productId = record.value().get("product_id").toString();
+        long quantity = (long) record.value().get("purchase_quantity");
+        double productprice = (double) record.value().get("product_price");
         // создаем ключ в сторе конкатенации начала окна и id продукта
         byte[] stateStoreKey = createKey(nearestMinutesTs, productId);
         Long oldVal = stateStore.get(stateStoreKey);
         long newVal = oldVal != null ? oldVal + quantity : quantity;
-        stateStore.put(stateStoreKey, newVal);
+        long sumval = (long) (newVal * productprice);
+        stateStore.put(stateStoreKey, sumval);
     }
 
     @Override
@@ -59,7 +61,7 @@ public class PurchaseQuantityAlertTrasformer implements Processor<String, Generi
                         .forEachRemaining(keyVal -> {
                             long ts = extractTsFromKey(keyVal.key);
                             String productId = extractProductIdFromKey(keyVal.key);
-                            Long count = keyVal.value;
+                            long count = keyVal.value;
                             if (count > QuantityAlertsApp.MAX_PURCHASES_PER_MINUTE) {
                                 // создаем схему нашего алерта
                                 Schema schema = SchemaBuilder.record("QuantityAlert").fields()
@@ -69,12 +71,12 @@ public class PurchaseQuantityAlertTrasformer implements Processor<String, Generi
                                         // в миллисекундах epoch
                                         .type(LogicalTypes.timestampMillis().addToSchema(Schema.create(Schema.Type.LONG)))
                                         .noDefault()
-                                        .requiredLong("number_of_purchases")
+                                        .requiredLong("sum_of_purchases")
                                         .endRecord();
                                 GenericRecord record = new GenericData.Record(schema);
                                 // старт окна у нас в миллисекундах
                                 record.put("window_start", ts);
-                                record.put("number_of_purchases", count);
+                                record.put("sum_of_purchases", count);
                                 context.forward(new Record<>(productId, record, ts));
                             }
                             // удаляем ключ из стора, так как по этому окну уже обработаны записи для этого ключа

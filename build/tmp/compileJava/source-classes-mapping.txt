@@ -1,0 +1,14 @@
+ru/netology/dsw/processor/StateUpdateSupplier.java
+ ru.netology.dsw.processor.StateUpdateSupplier
+ ru.netology.dsw.processor.StateUpdateSupplier$StateUpdater
+ru/netology/dsw/processor/ProductJoiner.java
+ ru.netology.dsw.processor.ProductJoiner
+ru/netology/dsw/processor/ProductJoinerApp.java
+ ru.netology.dsw.processor.ProductJoinerApp
+ ru.netology.dsw.processor.ProductJoinerApp$1
+ ru.netology.dsw.processor.ProductJoinerApp$JoinResult
+ru/netology/dsw/processor/PurchaseQuantityAlertTrasformer.java
+ ru.netology.dsw.processor.PurchaseQuantityAlertTrasformer
+ru/netology/dsw/processor/QuantityAlertsApp.java
+ ru.netology.dsw.processor.QuantityAlertsApp
+ ru.netology.dsw.processor.QuantityAlertsApp$1
